@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0d0a06">
+<meta name="description" content="六十四型人格图谱 · 24道沉浸式场景题 · 6维度64种人格类型 · 行为投射式测试">
+<title>六十四型人格图谱 · 64-Type Personality Atlas</title>
+<style>
+:root{
+  --bg:#0d0a06; --bg2:#14100a; --bg3:#1a140e;
+  --gold:#c9a84c; --gold-dim:#8a7330; --gold-light:#e8d49a;
+  --cream:#e8e0d0; --cream-dim:#a8a098;
+  --card:rgba(201,168,76,0.07); --card-hover:rgba(201,168,76,0.15);
+  --border:rgba(201,168,76,0.22); --border-hover:rgba(201,168,76,0.5);
+  --accent-glow:rgba(201,168,76,0.25);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--cream);
+  font-family:"Songti SC","STSong","SimSun","Noto Serif SC",serif;
+  line-height:1.8; overflow-x:hidden; min-height:100vh;
+}
+body::before{
+  content:''; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:radial-gradient(ellipse at 50% 15%,rgba(201,168,76,0.06) 0%,transparent 55%),
+             radial-gradient(ellipse at 80% 85%,rgba(201,168,76,0.03) 0%,transparent 50%);
+  pointer-events:none; z-index:0;
+}
+#app{width:100%; max-width:560px; margin:0 auto; padding:0 20px; position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column}
+.hidden{display:none!important}
+
+/* Cover */
+#cover{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; flex:1; min-height:100vh; padding-bottom:60px}
+#cover h1{font-size:clamp(2rem,8vw,2.6rem); color:var(--gold); letter-spacing:0.25em; font-weight:700; margin-bottom:6px; text-shadow:0 0 25px rgba(201,168,76,0.2)}
+#cover .subtitle{font-size:0.8rem; color:var(--cream-dim); letter-spacing:0.35em; margin-bottom:32px}
+#cover .ornament{color:var(--gold-dim); font-size:1rem; margin-bottom:32px; letter-spacing:0.8em; padding-left:0.8em}
+#cover .intro{font-size:0.92rem; color:var(--cream); line-height:2.2; margin-bottom:44px; max-width:380px; opacity:0.85}
+.start-btn{
+  display:inline-block; padding:14px 48px; font-size:1rem; color:var(--gold);
+  border:1px solid var(--gold-dim); border-radius:2px; background:transparent;
+  font-family:inherit; letter-spacing:0.25em; cursor:pointer; transition:all 0.4s;
+}
+.start-btn:hover,.start-btn:active{background:var(--card-hover); border-color:var(--gold); box-shadow:0 0 20px var(--accent-glow)}
+
+/* Progress */
+.progress-wrap{padding:20px 0 8px}
+.progress-bar{height:3px; background:rgba(201,168,76,0.1); border-radius:2px; overflow:hidden}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:2px; transition:width 0.5s ease; width:0%; position:relative; overflow:hidden}
+.progress-fill::after{content:''; position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent); transform:translateX(-100%); animation:shimmer 2s infinite}
+@keyframes shimmer{100%{transform:translateX(100%)}}
+.progress-text{font-size:0.72rem; color:var(--cream-dim); letter-spacing:0.12em; margin-top:7px; text-align:center}
+
+/* Quiz */
+#quiz{display:flex; flex-direction:column; flex:1; padding-top:10px}
+.q-wrap{flex:1; display:flex; flex-direction:column; justify-content:center; animation:fadeIn 0.5s ease}
+@keyframes fadeIn{from{opacity:0; transform:translateY(12px)}to{opacity:1; transform:translateY(0)}}
+.q-scenario{font-size:1.1rem; color:var(--gold-light); line-height:2; margin-bottom:28px; text-align:center}
+.options{display:flex; flex-direction:column; gap:11px}
+.option{
+  padding:15px 18px; background:var(--card); border:1px solid var(--border);
+  border-radius:4px; color:var(--cream); font-size:0.92rem; line-height:1.7;
+  cursor:pointer; transition:all 0.25s; font-family:inherit; text-align:left;
+  position:relative; overflow:hidden;
+}
+.option::before{content:''; position:absolute; left:0; top:0; width:3px; height:100%; background:var(--gold); transform:scaleY(0); transform-origin:top; transition:transform 0.25s}
+.option:hover,.option:active{background:var(--card-hover); border-color:var(--border-hover); color:var(--gold-light); transform:translateY(-1px)}
+.option:hover::before,.option:active::before{transform:scaleY(1)}
+
+/* Loading */
+#loading{display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; min-height:100vh}
+.load-ring{width:64px; height:64px; border:2px solid transparent; border-top-color:var(--gold); border-radius:50%; animation:spin 1.2s linear infinite; margin-bottom:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-text{color:var(--gold); font-size:1rem; letter-spacing:0.2em; animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{opacity:0.5}50%{opacity:1}}
+.load-sub{margin-top:14px; font-size:0.82rem; color:var(--cream-dim); max-width:300px; text-align:center; line-height:1.8}
+
+/* Result */
+#result{display:flex; flex-direction:column; align-items:center; flex:1; padding:28px 0 50px; animation:fadeIn 0.6s ease}
+.result-tag{font-size:0.72rem; color:var(--gold-dim); letter-spacing:0.3em; margin-bottom:8px}
+.result-code{font-size:1.5rem; color:var(--gold); letter-spacing:0.15em; font-weight:700; margin-bottom:6px; text-shadow:0 0 20px var(--accent-glow)}
+.result-name{font-size:1.8rem; color:var(--gold-light); letter-spacing:0.1em; margin-bottom:14px}
+.result-figures{font-size:0.82rem; color:var(--cream-dim); letter-spacing:0.1em; margin-bottom:20px; text-align:center}
+.result-divider{width:60px; height:1px; background:var(--gold-dim); margin:4px 0 22px}
+.result-desc{font-size:0.9rem; color:var(--cream); line-height:2.1; max-width:440px; margin-bottom:24px; opacity:0.9}
+
+/* Dimension chart */
+.dim-chart{width:100%; max-width:400px; margin-bottom:28px}
+.dim-chart-title{font-size:0.75rem; color:var(--gold-dim); letter-spacing:0.25em; text-align:center; margin-bottom:14px}
+.dim-row{margin-bottom:12px}
+.dim-label-row{display:flex; justify-content:space-between; font-size:0.72rem; margin-bottom:4px}
+.dim-label-pos{color:var(--gold)}
+.dim-label-neg{color:var(--cream-dim)}
+.dim-bar-bg{height:8px; background:rgba(201,168,76,0.06); border-radius:4px; overflow:hidden; position:relative; display:flex}
+.dim-bar-pos{height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:4px 0 0 4px; transition:width 1s ease}
+.dim-bar-neg{height:100%; background:rgba(201,168,76,0.12); border-radius:0 4px 4px 0; transition:width 1s ease}
+.dim-divider{position:absolute; left:50%; top:0; width:1px; height:100%; background:var(--gold-dim); opacity:0.5}
+
+/* Action buttons */
+.action-section{width:100%; max-width:400px}
+.retest-btn{
+  display:block; width:100%; padding:12px; font-size:0.85rem; color:var(--gold);
+  border:1px solid var(--gold-dim); border-radius:3px; background:transparent;
+  font-family:inherit; letter-spacing:0.15em; cursor:pointer; transition:all 0.3s; margin-bottom:10px;
+}
+.retest-btn:hover,.retest-btn:active{background:var(--card-hover); border-color:var(--gold)}
+.share-btn{
+  display:block; width:100%; padding:12px; font-size:0.85rem; color:var(--cream-dim);
+  border:1px solid rgba(201,168,76,0.15); border-radius:3px; background:transparent;
+  font-family:inherit; letter-spacing:0.15em; cursor:pointer; transition:all 0.3s;
+}
+.share-btn:hover,.share-btn:active{border-color:var(--gold-dim); color:var(--cream)}
+.share-text-box{font-size:0.8rem; color:var(--cream); line-height:1.8; background:var(--card); border:1px solid var(--border); border-radius:3px; padding:12px; white-space:pre-wrap; word-break:break-all; display:none; margin-top:10px}
+.copied-tip{font-size:0.72rem; color:var(--gold); text-align:center; margin-top:8px; opacity:0; transition:opacity 0.3s}
+.copied-tip.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- 封面 -->
+<div id="cover">
+  <h1>六十四型人格图谱</h1>
+  <div class="subtitle">64-TYPE PERSONALITY ATLAS</div>
+  <div class="ornament">· · ·</div>
+  <div class="intro">六维度，六十四种人格类型<br>二十四道行为投射场景题<br>在选择的瞬间，照见你的人格全息图<br><br>不问你「是什么人」<br>只看你在故事里怎么走</div>
+  <button class="start-btn" onclick="startQuiz()">开始测试</button>
+</div>
+
+<!-- 题目区 -->
+<div id="quiz" class="hidden">
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div class="q-wrap" id="qWrap"></div>
+</div>
+
+<!-- Loading -->
+<div id="loading" class="hidden">
+  <div class="load-ring"></div>
+  <div class="load-text">分析中</div>
+  <div class="load-sub">六维人格模型正在校准你的类型坐标</div>
+</div>
+
+<!-- 结果页 -->
+<div id="result" class="hidden">
+  <div class="result-tag">你的人格类型</div>
+  <div class="result-code" id="rCode"></div>
+  <div class="result-name" id="rName"></div>
+  <div class="result-figures" id="rFigures"></div>
+  <div class="result-divider"></div>
+  <div class="result-desc" id="rDesc"></div>
+  <div class="dim-chart">
+    <div class="dim-chart-title">六维倾向图谱</div>
+    <div id="dimChart"></div>
+  </div>
+  <div class="action-section">
+    <button class="retest-btn" onclick="location.reload()">重新测试</button>
+    <button class="share-btn" onclick="toggleShare()">复制结果</button>
+    <div class="share-text-box" id="shareBox"></div>
+    <div class="copied-tip" id="copiedTip">已复制到剪贴板</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var QUESTIONS = [{"dim": 0, "scenario": "周五晚上，手机同时弹出三条消息：同事约喝酒、室友在看电影、还有个朋友想打电话聊聊。你的第一反应是——", "opts": ["三条都不想拒，干脆把人凑到一块儿", "挑一个最想见的，其他改天再说", "都先搁着，等自己缓过来再回", "关静音，今晚谁也不想理"]}, {"dim": 0, "scenario": "你走进一个完全陌生的聚会，推开门的瞬间——", "opts": ["扫一眼全场，直接走向最热闹的那桌", "先找到认识的人，再慢慢融入", "在角落找个位置，等别人来找你", "有点后悔来了，想掉头走"]}, {"dim": 0, "scenario": "连续高强度社交三天后，第四天早上醒来——", "opts": ["精力不减，已经约好了今天的局", "还能撑，但想找个安静的地方吃午饭", "今天谁也别找我，需要一个人待着", "感觉整个人被掏空，闭关一天回血"]}, {"dim": 0, "scenario": "如果有人问你「理想的一天」——", "opts": ["从早到晚都有人陪着，热闹到半夜", "上午独处充好电，下午晚上和朋友聚", "大部分时间独处，晚上跟一个好友聊聊天", "完全独处，做自己喜欢的事，不被打扰"]}, {"dim": 1, "scenario": "你第一次走进一间百年老宅，最先吸引你的是——", "opts": ["门框上的雕花纹样和地板的磨损痕迹", "这栋宅子当年住过什么样的人", "如果把这些墙壁的故事拍成电影会怎样", "这栋宅子在百年后还会不会站在这里"]}, {"dim": 1, "scenario": "你听别人讲一个新想法时，脑子里的第一个问题是——", "opts": ["具体怎么落地？第一步做什么？", "有没有人试过？效果怎么样？", "这个想法背后更深层的逻辑是什么", "如果把这个想法推到极致会变成什么"]}, {"dim": 1, "scenario": "你拿到一个全新的任务，第一反应是——", "opts": ["先看清楚要求、资源和截止日期", "找同类案例参考，照着做不犯错", "先想这件事的本质是什么，再找切入点", "脑子里冒出十个可能方向，先发散再收敛"]}, {"dim": 1, "scenario": "当你回忆一段重要的经历时——", "opts": ["画面很清晰，记得当时穿了什么、说了什么", "记得大致经过和关键细节", "记得当时的感觉和这件事对自己的意义", "记得这件事如何改变了自己后来的人生轨迹"]}, {"dim": 2, "scenario": "好朋友哭着来找你，说被分手了。你的第一反应是——", "opts": ["问清楚怎么回事，帮ta分析问题出在哪", "先判断该不该劝，还是让ta自己消化", "什么都不说，先陪着，让ta哭够", "比ta还难过，恨不得马上冲去找对方理论"]}, {"dim": 2, "scenario": "团队两个人吵起来了，都来找你评理。你——", "opts": ["各自听完，按事实和规则判断对错", "理性分析利弊，找一个双方都能接受的方案", "先安抚情绪，等冷静了再说事", "感同身受地理解双方立场，帮他们和解"]}, {"dim": 2, "scenario": "你做了一个自己认为正确的决定，但亲近的人都不理解。你——", "opts": ["用事实和逻辑证明自己的判断，不被情感左右", "听完他们的理由，但最终还是按自己的判断走", "认真考虑他们的感受，犹豫是否要调整", "因为他们的态度而动摇，甚至放弃原计划"]}, {"dim": 2, "scenario": "你在网上看到一则令人愤怒的新闻——", "opts": ["先核实信息源，搞清楚事实再下判断", "理性分析事件的原因和后果", "第一反应是替受害者难过", "情绪上头，马上转发并评论表达愤怒"]}, {"dim": 3, "scenario": "旅行出发前一周，你的行李状态是——", "opts": ["已经列好清单，打包过半", "大致想好了带什么，出发前一天收拾", "打算出发当天随手塞，缺了再买", "行李箱还关着，到时候再说"]}, {"dim": 3, "scenario": "周日下午，你看了眼还没完成的待办清单——", "opts": ["马上开始逐项消灭，今日事今日毕", "先做最紧急的，其余安排好时间", "先休息一下，晚上有状态了再做", "什么清单？周日就该放空，明天再说"]}, {"dim": 3, "scenario": "你正在做一件重要的事，手机突然弹出新消息——", "opts": ["忽略，做完手头的事再统一处理", "快速扫一眼，不紧急就先搁着", "好奇心上来，先看看是什么事", "直接放下手头的活，先处理新消息"]}, {"dim": 3, "scenario": "你理想中的生活方式——", "opts": ["每天的节奏固定，有明确的计划和目标", "大方向有计划，细节可以灵活", "随性一点，走到哪算哪", "完全自由，讨厌被计划束缚"]}, {"dim": 4, "scenario": "你做了一个在外人看来很成功的决定，但结果出了点小瑕疵——", "opts": ["总体很满意，瑕疵是难免的", "还行，下次改进就好", "一直在想那个瑕疵，觉得自己应该做得更好", "反复复盘，觉得自己能力不够"]}, {"dim": 4, "scenario": "听说有人在背后议论你——", "opts": ["无所谓，嘴长在别人身上", "有点在意，但不会影响自己的状态", "很在意，忍不住想去打听说了什么", "整晚都在想这件事，甚至失眠"]}, {"dim": 4, "scenario": "面对一个完全未知的挑战——", "opts": ["兴奋大于紧张，直接上", "有点紧张但信心更多，边做边学", "先担心自己能不能做好", "焦虑感很重，反复犹豫要不要接"]}, {"dim": 4, "scenario": "深夜两点，你躺在床上想起白天的一次对话——", "opts": ["没什么好想的，说过就过了", "稍微回味一下就睡着了", "突然觉得自己当时某句话说错了", "开始疯狂回放对话细节，越想越睡不着"]}, {"dim": 5, "scenario": "你偶然发现一个完全陌生的领域，比如某种冷门手艺——", "opts": ["马上搜资料，恨不得明天就开始学", "很感兴趣，先收藏着有空研究", "觉得有意思，但不太会改变现有生活", "随它去吧，自己的事还忙不过来"]}, {"dim": 5, "scenario": "十年来你一直坚持的一个习惯——", "opts": ["习惯就是用来打破的，该换就换", "可以尝试新方式，但要保留核心", "既然有效就不轻易动", "坚持到底，改变意味着风险"]}, {"dim": 5, "scenario": "有人邀请你尝试一种全新的生活方式，比如数字游民——", "opts": ["正合我意，什么时候出发", "挺吸引人的，让我认真想想", "听起来不错，但我现有的生活也挺好", "不适合我，我喜欢稳定和可预期"]}, {"dim": 5, "scenario": "你对「改变」这件事的真实感受——", "opts": ["改变是生命力的来源，越变越活", "适度改变是好的，但不能太频繁", "改变让人不安，能不变就不变", "改变意味着失去，我宁愿守住已有的"]}];
+var TYPES = {"INTJAO": {"name": "破局·建筑师", "desc": "你是那种看到旧体系就想拆掉重建的人。内倾直觉让你洞察事物的底层架构，思考型判断让你用冷酷的逻辑执行构想。自信的底色让你不在乎外界的质疑，探索的驱力让你永远在寻找下一个需要打破的边界。你像一把锋利的手术刀，切开现状的肌理，露出未来的骨架。你的字典里没有「不可能」，只有「还没找到方法」。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "埃隆·马斯克、诸葛亮"}, "INTJAC": {"name": "铸基·建筑师", "desc": "你是安静的战略家，在内心构筑着精密的世界模型。直觉让你看到长远趋势，判断让你有条不紊地布局。自信让你不被短期波动动摇，坚守让你在选定方向上持续深耕数十年。你不追求颠覆，你要的是把一个领域做到别人无法超越的深度。时间站在你这边，因为你从不下牌桌。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "弗里德里希·尼采、司马懿"}, "INTJTO": {"name": "溯光·建筑师", "desc": "你内心有一座永不熄灭的灯塔，直觉把你推向未知的远方，但你永远觉得自己还不够好。追求完美让你反复打磨每一个细节，探索的本能让你不断拓展认知边界。你的痛苦在于：眼界的速度远超手速，看得见理想的轮廓却总差一步。但正是这种不满足，驱动你一次次逼近那个遥不可及的完美。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "尼古拉·特斯拉、王阳明"}, "INTJTC": {"name": "守拙·建筑师", "desc": "你在寂静中思考，在传统中寻找力量。直觉让你看到别人忽略的深层模式，但你不会轻易推翻已有的根基。谨慎让你反复验证每一个判断，坚守让你忠于自己的原则即使无人理解。你像一口深井，表面平静，底下暗流涌动。你的智慧不在嘴上，在你数十年如一日的坚持里。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "艾萨克·牛顿、张良"}, "INTPAO": {"name": "破局·逻辑学家", "desc": "你是思维的探险家，分析是你的母语。内倾思考让你天生擅长拆解复杂系统，感知让你保持开放不急于下结论。自信让你不怕提出反常识的结论，探索让你永远在追问下一个「为什么」。你不关心答案是否被接受，你只关心它是否逻辑自洽。对你来说，世界上没有无聊的问题，只有无聊的答案。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "理查德·费曼"}, "INTPAC": {"name": "铸基·逻辑学家", "desc": "你是安静的思考者，在逻辑的世界里自给自足。思考让你追求精确，感知让你不急于锁定答案。自信让你不被外界噪音干扰，坚守让你在已验证的框架内深耕。你不需要新刺激，一个有趣的问题就能让你沉浸数月。你的快乐不需要别人理解，思维本身的快感就是奖赏。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "阿尔伯特·爱因斯坦"}, "INTPTO": {"name": "溯光·逻辑学家", "desc": "你是永不停歇的追问者，思维的火焰烧不尽你的好奇。思考让你无法接受不严谨的结论，感知让你不断发现新的可能性。谨慎让你总觉得自己还没想透，探索让你不断跳入新的领域。你的脑海中同时运行着十个未完成的思想实验，每一个都可能是改变认知的钥匙，也可能是无底洞。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "阿兰·图灵"}, "INTPTC": {"name": "守拙·逻辑学家", "desc": "你是稳健的分析者，在已知的疆域里挖掘深度。思考让你追求逻辑的严密，感知让你保持方法的灵活。谨慎让你反复检查每一步推理，坚守让你忠于经过验证的方法论。你不追新潮，你相信好的问题值得花十年回答。深度比广度重要，正确比快速重要，这是你的信条。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "比尔·盖茨"}, "ENTJAO": {"name": "破局·指挥官", "desc": "天生的领导者，你看到格局就能制定战略。外倾直觉让你快速抓住机遇，思考判断让你果断决策。自信让你毫不犹豫地发号施令，探索让你永远在寻找下一个战场。你不是在管理现状，你是在创造新的秩序。你的野心不是权力本身，而是看到自己绘制的蓝图变成现实的那种掌控感。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "史蒂夫·乔布斯"}, "ENTJAC": {"name": "铸基·指挥官", "desc": "你是稳健的掌舵者，在复杂局势中保持方向感。直觉让你看到全局，判断让你有条不紊地推进。自信让你在危机中不慌，坚守让你在既定路线上持续用力。你相信战略的威力在于坚持执行，而不是频繁转向。你的领导力不靠魅力，靠的是让每个人都知道自己该做什么、为什么做。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "玛格丽特·撒切尔"}, "ENTJTO": {"name": "溯光·指挥官", "desc": "你是充满野心的征服者，眼界的辽阔让你无法安于现状。直觉让你看到别人看不到的机会，但内心的不安让你永远觉得不够。探索驱使你不断开拓新领域，谨慎让你在每次冒险后又反复审视。你的成功总是伴随着自我怀疑的拉锯，但正是这种张力让你比任何人都不肯停下来。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "拿破仑·波拿巴"}, "ENTJTC": {"name": "守拙·指挥官", "desc": "你是深思熟虑的统帅，在权力中保持克制。直觉让你有远见，判断让你有纪律。谨慎让你在决策前充分权衡，坚守让你忠于长期战略而非短期利益。你不追求风光，你要的是赢到最后。你相信真正的领导力不是做最多的事，而是做最对的事，然后把它做到极致。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "杰夫·贝索斯"}, "ENTPAO": {"name": "破局·辩论家", "desc": "你是思想的火种，走到哪里都能点燃争论。外倾直觉让你思维跳跃、创意爆棚，思考让你享受拆解一切观点的快感。自信让你不怕唱反调，探索让你永远在寻找新的角度。你不是为了赢，你是为了看真理在碰撞中露出真容。对你来说，没有什么是不能质疑的，包括这句话本身。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "列奥纳多·达·芬奇"}, "ENTPAC": {"name": "铸基·辩论家", "desc": "你是机智的策士，言辞是你的武器。直觉让你看到事物的多重面向，思考让你精准找到逻辑漏洞。自信让你在任何场合都能侃侃而谈，坚守让你在核心立场上不轻易动摇。你享受智识的交锋，但不会为了新奇而放弃已验证的洞见。你的犀利不是为了伤人，是为了切到真相。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "马克·吐温"}, "ENTPTO": {"name": "溯光·辩论家", "desc": "你是永不满足的创新者，脑子里永远在生成新想法。直觉让你看到无限可能，思考让你快速判断可行性。但谨慎让你总觉得自己还没想透，探索让你不断跳到下一个项目。你的垃圾桶里堆满了半成品杰作，但偶尔有那么一个走到了终点，就足以改变游戏规则。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "托马斯·爱迪生"}, "ENTPTC": {"name": "守拙·辩论家", "desc": "你是犀利的质疑者，在传统中寻找裂缝。直觉让你看到现有体系的漏洞，思考让你用逻辑击碎它。谨慎让你在提出反论前反复推敲，坚守让你忠于理性本身而非任何立场。你像苏格拉底一样，用提问瓦解一切自以为是的答案。你不在乎被讨厌，你在乎被说服。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "苏格拉底"}, "INFJAO": {"name": "破局·提倡者", "desc": "你是安静的变革者，内心燃烧着理想的火焰。内倾直觉让你看到人类未来的方向，情感让你深切关怀他人的命运。自信让你敢于独自走在前面，探索让你不断寻找实现理想的更好路径。你不呐喊，你用行动证明另一种可能。你的影响力不靠声量，靠的是那种让人不由自主跟随的确信感。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "圣雄甘地"}, "INFJAC": {"name": "铸基·提倡者", "desc": "你是深沉的理想主义者，在内心构筑着完美的道德秩序。直觉让你看到事物的深层意义，情感让你与他人的苦难共振。自信让你不被现实磨平棱角，坚守让你在选定的信念上至死不渝。你像一座灯塔，在黑暗中为迷途者指路。你不需要信徒，你只需要知道自己走的方向是对的。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "卡尔·荣格"}, "INFJTO": {"name": "溯光·提倡者", "desc": "你是敏感的先知，能感知到时代情绪的暗流。直觉让你看到别人看不到的未来，情感让你为人类的命运而忧虑。谨慎让你对自己的判断反复质疑，探索让你不断寻找新的理解框架。你的痛苦在于：看得太远，走得太慢，而世界总是在你预言的地方翻车。但你无法停止关怀。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "柏拉图"}, "INFJTC": {"name": "守拙·提倡者", "desc": "你是深沉的灵魂探索者，在内心挖掘人性的深度。直觉让你洞察人心，情感让你与他人深度共情。谨慎让你不轻易对外展露，坚守让你忠于内心的精神追求。你的文字像一把钥匙，打开读者心底紧锁的房间。你写的不是故事，你写的是每个人不敢面对的自己。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "陀思妥耶夫斯基"}, "INFPAO": {"name": "破局·调停者", "desc": "你是诗意的理想主义者，在现实世界里追寻梦境。内倾情感让你对价值有着近乎本能的敏感，感知让你保持对世界的好奇。自信让你敢于按自己的方式活，探索让你不断寻找新的表达方式。你的存在本身就是对平庸的温柔反抗。你不与世界争辩，你只是活成另一种样子。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "威廉·莎士比亚"}, "INFPAC": {"name": "铸基·调停者", "desc": "你是温柔的守护者，在喧嚣中守住内心的花园。情感让你与他人的痛苦共振，感知让你保持开放和包容。自信让你不被外界的冷漠改变，坚守让你忠于自己的价值观即使无人理解。你像一面镜子，让每个人在你面前看到最好的自己。你的温柔不是软弱，是选择。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "戴安娜王妃"}, "INFPTO": {"name": "溯光·调停者", "desc": "你是敏感的艺术家，内心的风暴化成了创造的光。情感让你对世界有着超乎常人的感受力，感知让你不断捕捉新的灵感。但谨慎让你总觉得自己表达得不够好，探索让你在痛苦中寻找美的出口。你的伤口是你的勋章，你的脆弱是你的才华。你把最深的痛写成了最美的诗。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "文森特·梵高"}, "INFPTC": {"name": "守拙·调停者", "desc": "你是安静的造梦者，在自己的世界里建造完整的宇宙。情感让你对笔下的人物感同身受，感知让你的想象自由飞翔。谨慎让你反复打磨每一个细节，坚守让你数十年如一日地深耕一个虚构世界。你不为外界写作，你为自己心中的读者。你创造的不是一个故事，是一种信仰。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "J.R.R.托尔金"}, "ENFJAO": {"name": "破局·主人公", "desc": "天生的感召者，你走到哪里都能点燃他人的热情。外倾情感让你天然地连接他人，判断让你有组织地推动变革。自信让你毫不犹豫地站到台前，探索让你不断寻找更好的影响力方式。你不是在领导，你是在唤醒。你让人们相信自己可以更好，然后他们就真的更好了。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "马丁·路德·金"}, "ENFJAC": {"name": "铸基·主人公", "desc": "你是温暖的引领者，用真诚赢得人心。情感让你与他人深度共鸣，判断让你有计划地实现共同目标。自信让你在困难面前不退缩，坚守让你在选定的道路上坚定前行。你相信团结的力量，也相信耐心的价值。你的领导力不靠命令，靠的是让每个人都觉得自己被看见、被需要。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "纳尔逊·曼德拉"}, "ENFJTO": {"name": "溯光·主人公", "desc": "你是充满使命感的引路人，理想让你无法安于现状。情感让你感受他人的痛苦，判断让你制定改变的计划。但谨慎让你总觉得自己做得不够，探索让你不断寻找更有效的方式。你的号召力来自真实的共情而非表演，你的疲惫来自把太多人的重量扛在了自己肩上。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "贝拉克·奥巴马"}, "ENFJTC": {"name": "守拙·主人公", "desc": "你是深沉的鼓舞者，用故事和温度改变人心。情感让你与他人深度连接，判断让你有节奏地传递理念。谨慎让你在开口前充分倾听，坚守让你忠于自己的信念不被潮流左右。你的话语像种子，种在听众心里慢慢生长。你不追求掌声，你追求改变。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "奥普拉·温弗瑞"}, "ENFPAO": {"name": "破局·竞选者", "desc": "你是自由的火花，走到哪里都能照亮一片。外倾直觉让你看到无限可能，情感让你与人真诚连接。自信让你不怕展现真实的自己，探索让你永远在寻找下一种活法。你的存在本身就是一种可能性宣言。你不信「应该」，你信「还可以」。你让身边的人突然觉得：原来人生还可以这样过。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "罗宾·威廉姆斯"}, "ENFPAC": {"name": "铸基·竞选者", "desc": "你是温暖的造梦者，用想象力改变世界。直觉让你看到别人看不到的潜力，情感让你在乎每一个人的感受。自信让你不被现实击碎梦想，坚守让你在选定的创造之路上持续输出。你像迪士尼一样，把梦变成了产业，把童话变成了现实。你相信快乐的传递本身就是一种价值。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "沃尔特·迪士尼"}, "ENFPTO": {"name": "溯光·竞选者", "desc": "你是敏感的创造者，情感和想象力的风暴在你心中交织。直觉让你不断产生新想法，情感让你对世界有着超常的感受力。但谨慎让你对自己的作品永远不满意，探索让你在痛苦中寻找新的表达。你的脆弱和才华一样真实，你的笑声背后藏着只有自己知道的深渊。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "苏斯博士"}, "ENFPTC": {"name": "守拙·竞选者", "desc": "你是充满魅力的叙事者，在情感的世界里建造城堡。直觉让你看到故事的可能，情感让你与角色和观众共振。谨慎让你反复打磨每一个细节，坚守让你忠于自己的创作直觉。你的幽默和深情一样动人，你让人们笑着笑着就红了眼眶。你不需要大舞台，你在哪里，故事就在哪里。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "小罗伯特·唐尼"}, "ISTJAO": {"name": "破局·物流师", "desc": "你是稳健的开拓者，用纪律和效率开辟新路。内倾实感让你尊重事实和经验，判断让你有条不紊地执行。自信让你不被困难吓退，探索让你在传统中寻找改进的空间。你不追革命，你信进化。你相信每天进步百分之一，一年后就是三十七倍。你的力量不在于爆发，在于永不中断。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "乔治·华盛顿"}, "ISTJAC": {"name": "铸基·物流师", "desc": "你是可靠的基石，在动荡中保持稳定。实感让你脚踏实地，判断让你严守规则和秩序。自信让你在压力下不动摇，坚守让你忠于职责数十年如一日。你是那种在关键时刻可以托付一切的人。你不许诺奇迹，你只交付结果。你的沉默不是无话可说，是话不如事。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "伊丽莎白二世"}, "ISTJTO": {"name": "溯光·物流师", "desc": "你是勤勉的守护者，在细节中发现价值。实感让你精准把握现实，判断让你高效完成任务。但谨慎让你总觉得自己做得不够好，探索让你在安全区边缘试探新的可能。你的成长来自持续的微小改进，你的焦虑来自永远达不到自己设定的标准。但你不会停下来，因为停下来比焦虑更可怕。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "沃伦·巴菲特"}, "ISTJTC": {"name": "守拙·物流师", "desc": "你是严谨的管理者，用秩序和纪律维系运转。实感让你不放过任何细节，判断让你有计划地推进。谨慎让你在决策前充分验证，坚守让你忠于经过时间检验的方法。你相信：做得对比做得快重要。你不追新概念，你信数据和经验。你的可靠性是你最大的竞争力。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "安格拉·默克尔"}, "ISFJAO": {"name": "破局·守卫者", "desc": "你是温暖的守护者，在默默付出中改变身边的世界。内倾实感让你注意到别人忽略的需求，情感让你真诚地关怀他人。自信让你敢于为弱者发声，探索让你在守护中寻找更好的方式。你的力量不在声音的大小，而在坚持的长久。你不需要被感谢，你需要的是知道自己守护的东西好好的。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "特蕾莎修女"}, "ISFJAC": {"name": "铸基·守卫者", "desc": "你是沉默的脊梁，用忠诚和奉献支撑着身边的人。实感让你看到具体的需求，情感让你与他人共情。自信让你在困难中不退缩，坚守让你在守护的岗位上从不缺席。你像大地一样，承载一切却不张扬。你的爱不挂在嘴上，在你每天做的那些没人注意到的小事里。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "罗莎·帕克斯"}, "ISFJTO": {"name": "溯光·守卫者", "desc": "你是细腻的照料者，对他人的痛苦有着超常的敏感。实感让你关注具体的细节，情感让你与他人的情绪共振。但谨慎让你总觉得自己做得不够，探索让你不断学习新的方式来帮助他人。你的温柔里有韧性，你的付出里有焦虑。你把别人的需要放在自己前面，却忘了自己也需要被照顾。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "凯瑟琳·米德尔顿"}, "ISFJTC": {"name": "守拙·守卫者", "desc": "你是忠实的守卫者，在责任中找到安身立命之所。实感让你脚踏实地，情感让你真心关怀他人。谨慎让你在行动前充分准备，坚守让你在承诺的路上从不退缩。你是那种可以放心把后背交给的人。你的忠诚不是盲从，是你经过深思熟虑后选择的责任。你守护的不是人，是信任本身。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "乔治·H·W·布什"}, "ESTJAO": {"name": "破局·总经理", "desc": "你是天生的组织者，用效率和秩序征服一切。外倾实感让你快速把握现实状况，思考判断让你制定明确的规则。自信让你毫不犹豫地发号施令，探索让你在管理中不断寻找更优方案。你不只是管理现状，你在优化它。你相信没有完美的流程，只有持续改进的流程。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "弗兰克·辛纳屈"}, "ESTJAC": {"name": "铸基·总经理", "desc": "你是稳健的掌舵者，用经验和判断力维系运转。实感让你尊重事实和传统，思考让你做出理性的决策。自信让你在危机中稳定军心，坚守让你在已验证的方法上持续深耕。你相信秩序的力量，也相信时间的价值。你不追管理潮流，你信基本动作：清晰的目标、明确的分工、严格的执行。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "詹姆斯·门罗"}, "ESTJTO": {"name": "溯光·总经理", "desc": "你是勤奋的管理者，在细节和效率中追求极致。实感让你不放过任何可优化的环节，思考让你做出精确的判断。但谨慎让你总觉得自己做得不够好，探索让你在安全范围内尝试改进。你的标准永远在提高，你的满足感永远在下一公里。你把效率当成信仰，把浪费当成罪过。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "亨利·福特"}, "ESTJTC": {"name": "守拙·总经理", "desc": "你是严格的执法者，用规则和标准维系公平。实感让你尊重事实和先例，思考让你做出不偏不倚的判断。谨慎让你在裁决前充分权衡，坚守让你忠于法律和秩序本身。你相信：规则不是束缚，规则是保护。你不会因为人情而通融，因为你知道一旦开口子，公平就碎了。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "索尼亚·索托马约尔"}, "ESFJAO": {"name": "破局·执政官", "desc": "你是温暖的凝聚者，用真诚和热情连接每一个人。外倾情感让你天然地感知他人的需求，判断让你有组织地照顾到所有人。自信让你在社交中如鱼得水，探索让你不断寻找新的连接方式。你是人群中的太阳，照亮每一个角落。你让每个人都觉得自己被重视，然后他们就会为你做任何事。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "泰勒·斯威夫特"}, "ESFJAC": {"name": "铸基·执政官", "desc": "你是可靠的守护者，用关怀和秩序维系社群的温暖。情感让你与他人深度共鸣，判断让你有计划地照顾他人。自信让你在困难中不退缩，坚守让你在守护的岗位上持续付出。你像一棵大树，为所有人遮风挡雨。你的爱不是抽象的，是具体的：一顿热饭、一句问候、一个及时的拥抱。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "休·杰克曼"}, "ESFJTO": {"name": "溯光·执政官", "desc": "你是敏感的连接者，对他人的情绪有着雷达般的感知。情感让你与每一个人共振，判断让你有序地回应。但谨慎让你总担心自己做得不够好，探索让你不断学习新的方式来关怀他人。你的温暖里有真实的焦虑，你的笑容有时是给别人看的。你需要被需要，但你也需要被看见。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "詹妮弗·加纳"}, "ESFJTC": {"name": "守拙·执政官", "desc": "你是忠实的守护者，在传统和责任中找到归属。情感让你真心关怀他人，判断让你有条不紊地履行职责。谨慎让你在行动前充分准备，坚守让你忠于自己的承诺。你是家庭和社群的粘合剂。你相信仪式感的力量：节日要一起过、生日不能忘、承诺必须兑现。你守的不是规矩，是关系。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "史蒂夫·哈维"}, "ISTPAO": {"name": "破局·鉴赏家", "desc": "你是冷静的行动者，用双手和工具解决一切问题。内倾思考让你快速分析问题本质，感知让你灵活应对变化。自信让你在危险中保持冷静，探索让你不断尝试新的方法和工具。你不需要理论，你需要的是拆开看看里面怎么回事。你信手感胜过信说明书，信实践胜过信权威。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "李小龙"}, "ISTPAC": {"name": "铸基·鉴赏家", "desc": "你是沉默的工匠，在专注中达到精通。思考让你追求技术的精确，感知让你保持灵活和冷静。自信让你不被外界干扰，坚守让你在选定的手艺上持续精进。你的话不多，但你的手艺替你说话。你不需要解释你在做什么，你做出来的东西会自己证明一切。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "克林特·伊斯特伍德"}, "ISTPTO": {"name": "溯光·鉴赏家", "desc": "你是敏锐的观察者，在行动中不断试探边界。思考让你快速判断最优解，感知让你灵活适应。但谨慎让你在冒险后反复复盘，探索让你不断寻找新的挑战。你的冷静下面藏着对极限的好奇，你的沉默里运行着精密的计算。你不是不怕死，你是怕无聊。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "丹尼尔·克雷格"}, "ISTPTC": {"name": "守拙·鉴赏家", "desc": "你是稳健的实干者，用经验和技能解决问题。思考让你找到最高效的方案，感知让你灵活执行。谨慎让你在行动前充分评估风险，坚守让你忠于经过验证的技术和工具。你不追新潮，你信手感。你的工具箱里每一样东西都有它的位置，你的脑子也一样。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "贝尔·格里尔斯"}, "ISFPAO": {"name": "破局·探险家", "desc": "你是自由的灵魂，用美感和行动表达自我。内倾情感让你对美有着本能的感知，感知让你活在当下。自信让你不怕做自己，探索让你不断寻找新的美感和体验。你的生活本身就是一件作品。你不规划人生，你体验人生。你相信当下即永恒，瞬间即全部。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "迈克尔·杰克逊"}, "ISFPAC": {"name": "铸基·探险家", "desc": "你是安静的艺术家，在创造中找到自我。情感让你与世界深度共情，感知让你捕捉当下的美。自信让你不被外界定义，坚守让你在选定的美学道路上持续深耕。你像一朵花，不为谁开，但所有人都被你吸引。你不需要观众，你需要的是创造本身带来的那种完整感。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "弗里达·卡罗"}, "ISFPTO": {"name": "溯光·探险家", "desc": "你是敏感的创造者，情感和美感在你心中交织成风暴。情感让你对世界有着超常的感受力，感知让你活在每一个瞬间。但谨慎让你总觉得自己不够好，探索让你在痛苦中寻找美的表达。你的脆弱是你的灵感，你的伤口是你的颜料。你把无法说出口的感受化成了旋律和色彩。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "鲍勃·迪伦"}, "ISFPTC": {"name": "守拙·探险家", "desc": "你是内敛的艺术家，在沉默中创造永恒。情感让你与内心世界深度连接，感知让你捕捉微妙的细节。谨慎让你反复打磨每一个作品，坚守让你忠于自己的美学直觉。你不需要外界的认可，你需要的是内心的和谐。你的优雅不是学来的，是你与自己和解后的自然流露。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "奥黛丽·赫本"}, "ESTPAO": {"name": "破局·企业家", "desc": "你是天生的冒险家，在行动中抓住一切机会。外倾实感让你快速把握现实，思考判断让你做出精明的决策。自信让你毫不犹豫地纵身一跃，探索让你永远在寻找下一个刺激。你不是在生活，你是在征服生活。你相信：做了再说，错了再改，不动才是最大的风险。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "麦当娜"}, "ESTPAC": {"name": "铸基·企业家", "desc": "你是果敢的行动派，用胆识和判断力开拓道路。实感让你快速评估局势，思考让你做出理性决策。自信让你在风险中不退缩，坚守让你在选定的方向上持续用力。你相信行动比分析更有力，经验比理论更可靠。你不做计划书，你看准了就干，干错了就调，调对了就冲。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "欧内斯特·海明威"}, "ESTPTO": {"name": "溯光·企业家", "desc": "你是冲动的冒险者，在刺激和风险中寻找存在感。实感让你活在当下，思考让你快速判断。但谨慎让你在冒险后又后悔，探索让你无法安于平静。你的生活像过山车，但你享受这种眩晕。你不是不怕摔，你是怕没活过。你的肾上腺素是你的信仰，你的伤疤是你的履历。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "唐纳德·特朗普"}, "ESTPTC": {"name": "守拙·企业家", "desc": "你是精明的实干家，用经验和胆识在现实中开辟道路。实感让你不放过任何机会，思考让你做出利己的判断。谨慎让你在冒险前充分评估，坚守让你在已验证的策略上持续发力。你相信：赢比赢得漂亮更重要。你不是赌徒，你是算好了赔率才上桌的人。你的冒险是精确的冒险。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "戈登·拉姆齐"}, "ESFPAO": {"name": "破局·表演者", "desc": "你是人群中的光芒，用热情和活力点燃每一个场合。外倾实感让你活在当下，情感让你与人真诚连接。自信让你不怕成为焦点，探索让你永远在寻找新的体验和乐趣。你的存在让平凡的日子变成了派对。你不追求深刻，你追求真实。你把每一个当下都活到了极致，这就是你的深刻。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "玛丽莲·梦露"}, "ESFPAC": {"name": "铸基·表演者", "desc": "你是温暖的发光体，用真诚和魅力感染每一个人。实感让你享受当下的美好，情感让你与他人深度共鸣。自信让你在任何场合都自在，坚守让你在人际关系中持续投入。你像阳光，走到哪里暖到哪里。你的快乐不是表演，是你与生俱来的生命力。你让人们忘记烦恼，这本身就是一种天赋。自信是你的铠甲，让你在质疑和压力面前保持定力，但偶尔也会让你忽略值得反思的盲区。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "阿黛尔"}, "ESFPTO": {"name": "溯光·表演者", "desc": "你是敏感的表演者，在舞台和现实中寻找被爱。实感让你享受当下的刺激，情感让你与观众深度共振。但谨慎让你在散场后感到空虚，探索让你不断寻找新的舞台。你的笑容背后有不为人知的脆弱，你的光环下面有只有自己看到的裂缝。但你上了台就是王者，这没有人能质疑。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。探索的本能让你始终站在变化的前沿，你拥抱未知如同呼吸，但记得偶尔停下来，把已有的收获沉淀成可以回头的根基。", "figures": "杰米·奥利弗"}, "ESFPTC": {"name": "守拙·表演者", "desc": "你是魅力的化身，在聚光灯和日常中切换自如。实感让你活在当下，情感让你与他人真诚连接。谨慎让你在表现前充分准备，坚守让你忠于自己的风格和品味。你不需要新舞台，你在任何地方都能发光。你的魅力不是技术，是你对生活的热爱本身。你让平凡的日子变得值得纪念。谨慎是你的双刃剑，它驱动你不断精进、追求极致，但也可能在完美主义的漩涡中让你耗尽心力。坚守的定力让你在浮躁的世界中如磐石般稳定，你珍视已有的根基和传承，但别让安全感变成禁锢成长的围墙。", "figures": "埃尔顿·约翰"}};
+var DIMS = [{"pos": "E", "neg": "I", "posName": "外倾", "negName": "内倾", "posDesc": "你从外部世界汲取能量，在人群和互动中找到自己的节奏", "negDesc": "你在独处中充电，内心的世界比外在的喧嚣更让你安定", "label": "能量方向"}, {"pos": "S", "neg": "N", "posName": "实感", "negName": "直觉", "posDesc": "你相信看得见摸得着的事实，经验是你最可靠的罗盘", "negDesc": "你习惯捕捉事物背后的意义和可能性，目光总落在地平线之外", "label": "认知方式"}, {"pos": "T", "neg": "F", "posName": "思考", "negName": "情感", "posDesc": "你用逻辑和客观分析做决定，不被情绪左右是你的底色", "negDesc": "你以感受和价值观为度量衡，在乎的人比对的答案更重要", "label": "判断依据"}, {"pos": "J", "neg": "P", "posName": "判断", "negName": "感知", "posDesc": "你喜欢有计划、有节奏的生活，确定感让你安心", "negDesc": "你享受灵活和开放，留有余地比锁定方向更自在", "label": "生活态度"}, {"pos": "A", "neg": "T", "posName": "自信", "negName": "谨慎", "posDesc": "你对自己有稳定的信心，不容易被外界评价动摇", "negDesc": "你对自己有更高的要求，内心的不满足是你成长的燃料", "label": "自我认同"}, {"pos": "O", "neg": "C", "posName": "探索", "negName": "坚守", "posDesc": "你对新事物有天然的好奇，改变对你来说是呼吸而不是冒险", "negDesc": "你珍视稳定和传承，已有的根基比未知的可能更值得守护", "label": "变革倾向"}];
+
+var scores = [0,0,0,0,0,0];
+var qIdx = 0;
+
+function startQuiz() {
+  document.getElementById('cover').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion() {
+  if (qIdx >= QUESTIONS.length) {
+    showLoading();
+    return;
+  }
+  var q = QUESTIONS[qIdx];
+  var pct = (qIdx / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = (qIdx + 1) + ' / ' + QUESTIONS.length;
+
+  var html = '<div class="q-scenario">' + q.scenario + '</div><div class="options">';
+  var optScores = [2, 1, -1, -2];
+  for (var i = 0; i < q.opts.length; i++) {
+    html += '<div class="option" onclick="answer(' + q.dim + ',' + optScores[i] + ')">' + q.opts[i] + '</div>';
+  }
+  html += '</div>';
+  var wrap = document.getElementById('qWrap');
+  wrap.innerHTML = html;
+  wrap.style.animation = 'none';
+  void wrap.offsetHeight;
+  wrap.style.animation = 'fadeIn 0.5s ease';
+}
+
+function answer(dim, score) {
+  scores[dim] += score;
+  qIdx++;
+  showQuestion();
+}
+
+function showLoading() {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = QUESTIONS.length + ' / ' + QUESTIONS.length;
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('loading').classList.remove('hidden');
+  setTimeout(showResult, 1800);
+}
+
+function getTypeCode() {
+  var code = '';
+  for (var i = 0; i < 6; i++) {
+    code += scores[i] >= 0 ? DIMS[i].pos : DIMS[i].neg;
+  }
+  return code;
+}
+
+function showResult() {
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+
+  var code = getTypeCode();
+  var t = TYPES[code];
+
+  document.getElementById('rCode').textContent = code;
+  document.getElementById('rName').textContent = t.name;
+  document.getElementById('rFigures').textContent = '代表人物 · ' + t.figures;
+  document.getElementById('rDesc').textContent = t.desc;
+
+  // Dimension chart
+  var chartHtml = '';
+  for (var i = 0; i < 6; i++) {
+    var s = scores[i];
+    var posPct = Math.round(((s + 8) / 16) * 100);
+    var negPct = 100 - posPct;
+    chartHtml += '<div class="dim-row">';
+    chartHtml += '<div class="dim-label-row">';
+    chartHtml += '<span class="dim-label-pos">' + DIMS[i].posName + ' ' + posPct + '%</span>';
+    chartHtml += '<span class="dim-label-neg">' + negPct + '% ' + DIMS[i].negName + '</span>';
+    chartHtml += '</div>';
+    chartHtml += '<div class="dim-bar-bg"><div class="dim-bar-pos" style="width:' + posPct + '%"></div><div class="dim-bar-neg" style="width:' + negPct + '%"></div><div class="dim-divider"></div></div>';
+    chartHtml += '</div>';
+  }
+  document.getElementById('dimChart').innerHTML = chartHtml;
+
+  // Animate bars
+  setTimeout(function() {
+    var bars = document.querySelectorAll('.dim-bar-pos, .dim-bar-neg');
+    bars.forEach(function(b) { b.style.width = b.style.width; });
+  }, 100);
+
+  // Share text
+  var shareText = '六十四型人格图谱
+
+我的人格类型：' + code + ' · ' + t.name + '
+代表人物：' + t.figures + '
+
+' + window.location.href;
+  document.getElementById('shareBox').textContent = shareText;
+
+  window.scrollTo(0, 0);
+}
+
+function toggleShare() {
+  var box = document.getElementById('shareBox');
+  if (box.style.display === 'block') {
+    box.style.display = 'none';
+  } else {
+    box.style.display = 'block';
+    var text = box.textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() {
+        showCopiedTip();
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopiedTip();
+    }
+  }
+}
+
+function showCopiedTip() {
+  var tip = document.getElementById('copiedTip');
+  tip.classList.add('show');
+  setTimeout(function() { tip.classList.remove('show'); }, 2000);
+}
+</script>
+</body>
+</html>
