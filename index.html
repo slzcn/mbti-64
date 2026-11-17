@@ -260,12 +260,7 @@ function showResult() {
   }, 100);
 
   // Share text
-  var shareText = '六十四型人格图谱
-
-我的人格类型：' + code + ' · ' + t.name + '
-代表人物：' + t.figures + '
-
-' + window.location.href;
+  var shareText = '六十四型人格图谱\n\n我的人格类型：' + code + ' · ' + t.name + '\n代表人物：' + t.figures + '\n\n' + window.location.href;
   document.getElementById('shareBox').textContent = shareText;
 
   window.scrollTo(0, 0);
