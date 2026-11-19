@@ -98,6 +98,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .dim-row{margin-bottom:clamp(8px,2vw,12px)}
 .dim-label-row{display:flex; justify-content:space-between; font-size:clamp(0.68rem,2vw,0.75rem); margin-bottom:4px; gap:8px}
 .dim-label-pos{color:var(--gold)}
+.tie-badge{font-size:11px;color:var(--gold);border:1px solid var(--gold);border-radius:8px;padding:1px 6px;margin-left:6px;opacity:.85;white-space:nowrap}
+.tie-note{margin-top:14px;font-size:12px;color:#999;line-height:1.8}
 .dim-label-neg{color:var(--cream-dim)}
 .dim-bar-bg{height:8px; background:rgba(201,168,76,0.06); border-radius:4px; overflow:hidden; position:relative; display:flex}
 .dim-bar-pos{height:100%; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); border-radius:4px 0 0 4px; transition:width 1s ease}
@@ -218,6 +220,7 @@ var TYPES = {"INTJAO": {"name": "破局·建筑师", "desc": "你是那种看到
 var DIMS = [{"pos": "E", "neg": "I", "posName": "外倾", "negName": "内倾", "posDesc": "你从外部世界汲取能量，在人群和互动中找到自己的节奏", "negDesc": "你在独处中充电，内心的世界比外在的喧嚣更让你安定", "label": "能量方向"}, {"pos": "S", "neg": "N", "posName": "实感", "negName": "直觉", "posDesc": "你相信看得见摸得着的事实，经验是你最可靠的罗盘", "negDesc": "你习惯捕捉事物背后的意义和可能性，目光总落在地平线之外", "label": "认知方式"}, {"pos": "T", "neg": "F", "posName": "思考", "negName": "情感", "posDesc": "你用逻辑和客观分析做决定，不被情绪左右是你的底色", "negDesc": "你以感受和价值观为度量衡，在乎的人比对的答案更重要", "label": "判断依据"}, {"pos": "J", "neg": "P", "posName": "判断", "negName": "感知", "posDesc": "你喜欢有计划、有节奏的生活，确定感让你安心", "negDesc": "你享受灵活和开放，留有余地比锁定方向更自在", "label": "生活态度"}, {"pos": "A", "neg": "T", "posName": "自信", "negName": "谨慎", "posDesc": "你对自己有稳定的信心，不容易被外界评价动摇", "negDesc": "你对自己有更高的要求，内心的不满足是你成长的燃料", "label": "自我认同"}, {"pos": "O", "neg": "C", "posName": "探索", "negName": "坚守", "posDesc": "你对新事物有天然的好奇，改变对你来说是呼吸而不是冒险", "negDesc": "你珍视稳定和传承，已有的根基比未知的可能更值得守护", "label": "变革倾向"}];
 
 var scores = [0,0,0,0,0,0];
+var firstAns = [null,null,null,null,null,null];
 var qIdx = 0;
 
 function startQuiz() {
@@ -250,6 +253,7 @@ function showQuestion() {
 }
 
 function answer(dim, score) {
+  if (firstAns[dim] === null) firstAns[dim] = score;
   scores[dim] += score;
   qIdx++;
   showQuestion();
@@ -266,7 +270,9 @@ function showLoading() {
 function getTypeCode() {
   var code = '';
   for (var i = 0; i < 6; i++) {
-    code += scores[i] >= 0 ? DIMS[i].pos : DIMS[i].neg;
+    if (scores[i] > 0) code += DIMS[i].pos;
+    else if (scores[i] < 0) code += DIMS[i].neg;
+    else code += (firstAns[i] !== null && firstAns[i] < 0) ? DIMS[i].neg : DIMS[i].pos;
   }
   return code;
 }
@@ -285,17 +291,22 @@ function showResult() {
 
   // Dimension chart
   var chartHtml = '';
+  var tieDims = [];
   for (var i = 0; i < 6; i++) {
     var s = scores[i];
+    if (s === 0) tieDims.push(DIMS[i].posName + '/' + DIMS[i].negName);
     var posPct = Math.round(((s + 8) / 16) * 100);
     var negPct = 100 - posPct;
     chartHtml += '<div class="dim-row">';
     chartHtml += '<div class="dim-label-row">';
-    chartHtml += '<span class="dim-label-pos">' + DIMS[i].posName + ' ' + posPct + '%</span>';
+    chartHtml += '<span class="dim-label-pos">' + DIMS[i].posName + ' ' + posPct + '%' + (s === 0 ? ' <span class="tie-badge">⚖ 50/50</span>' : '') + '</span>';
     chartHtml += '<span class="dim-label-neg">' + negPct + '% ' + DIMS[i].negName + '</span>';
     chartHtml += '</div>';
     chartHtml += '<div class="dim-bar-bg"><div class="dim-bar-pos" style="width:' + posPct + '%"></div><div class="dim-bar-neg" style="width:' + negPct + '%"></div><div class="dim-divider"></div></div>';
     chartHtml += '</div>';
+  }
+  if (tieDims.length > 0) {
+    chartHtml += '<div class="tie-note">⚖ 50/50 边缘维度：' + tieDims.join('、') + '。正负完全打平，字母取向由该维度第一题的选择判定。</div>';
   }
   document.getElementById('dimChart').innerHTML = chartHtml;
 
